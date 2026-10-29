@@ -1,0 +1,3 @@
+# smart wallets to copy, one Solana address per line
+# pick them yourself: DexScreener -> a token that already ran -> Top Traders
+# lines starting with # are ignored

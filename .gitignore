@@ -1,0 +1,6 @@
+.env
+*.csv
+book.json
+signals.jsonl
+done.txt
+__pycache__/
