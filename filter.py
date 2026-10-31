@@ -1,5 +1,6 @@
 # filter.py
 # six hard rules from two free APIs. no model, no opinion. missing data kills.
+# a rugcheck error or an empty report raises: crew.py counts it, it never passes.
 import time, requests
 from config import FILTER as F
 
@@ -7,8 +8,16 @@ RC = "https://api.rugcheck.xyz/v1/tokens/{}/report"
 DS = "https://api.dexscreener.com/tokens/v1/solana/{}"
 
 
+class NoData(Exception):
+    pass
+
+
 def facts(mint: str) -> dict:
-    rc = requests.get(RC.format(mint), timeout=20).json()
+    r = requests.get(RC.format(mint), timeout=20)
+    r.raise_for_status()                    # 502 / 429 / timeout = error, not a pass
+    rc = r.json()
+    if not rc.get("token") or not rc.get("topHolders") or "creatorBalance" not in rc:
+        raise NoData(f"rugcheck report empty for {mint}")
     pairs = requests.get(DS.format(mint), timeout=15).json() or []
     liq = lambda p: (p.get("liquidity") or {}).get("usd", 0)
     pool = max(pairs, key=liq) if pairs else {}
@@ -20,7 +29,7 @@ def facts(mint: str) -> dict:
         "symbol": rc["tokenMeta"]["symbol"],
         "dev_pct": 100 * rc["creatorBalance"] / supply if supply else None,
         "liq_usd": liq(pool) or None,
-        "top10_pct": round(sum(h["pct"] for h in holders[:10]), 1),
+        "top10_pct": round(sum(h["pct"] for h in holders[:10]), 1) if holders else None,
         "insiders": len(rc.get("insiderNetworks") or []),
         "h1_change": (pool.get("priceChange") or {}).get("h1"),
         "age_min": (time.time() * 1000 - born) / 60000 if born else None,
@@ -29,7 +38,8 @@ def facts(mint: str) -> dict:
 
 
 def kill(f: dict) -> str | None:
-    if None in (f["dev_pct"], f["liq_usd"], f["h1_change"], f["age_min"]):
+    need = ("dev_pct", "liq_usd", "top10_pct", "h1_change", "age_min")
+    if any(f[k] is None for k in need):
         return "missing data"
     if f["authority"]:                        return "mint or freeze still open"
     if f["dev_pct"] > F["dev_max_pct"]:       return "Dev wallet >5%"

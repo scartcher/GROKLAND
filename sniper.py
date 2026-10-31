@@ -2,7 +2,7 @@
 # sizes the copy, prices it with a real Jupiter quote, writes it into the book.
 import csv, json, os, time, requests
 from config import LOG, BOOK, PAPER, CAP_USD, TICKET_PCT, MAX_OPEN, STOP_PCT
-from config import DAILY_LOSS_HALT_USD
+from config import DAILY_LOSS_HALT_USD, MAX_COIN_PCT
 from scout import SOL, USDC
 
 JUP = "https://lite-api.jup.ag/swap/v1/quote"
@@ -48,8 +48,10 @@ def limits(b: dict) -> str | None:
 
 def copy(mint: str, symbol: str, wallet: str) -> str:
     b = book()
+    if mint in b["open"]:
+        return f"skipped {symbol}: already holding it"
     equity = b["cash"] + sum(p["usd"] for p in b["open"].values())
-    usd = round(min(b["cash"], equity * TICKET_PCT), 2)
+    usd = round(min(b["cash"], equity * TICKET_PCT, equity * MAX_COIN_PCT), 2)
     lamports = int(usd / sol_usd() * 1e9)
     raw = quote(SOL, mint, lamports)        # what you'd really get, slippage in
     if not raw:

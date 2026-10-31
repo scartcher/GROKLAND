@@ -4,3 +4,5 @@ book.json
 signals.jsonl
 done.txt
 __pycache__/
+health.json
+STOP

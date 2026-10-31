@@ -8,8 +8,16 @@ RPC = "https://api.mainnet-beta.solana.com"   # use a Helius/Triton URL when liv
 # money
 CAP_USD = 100                 # the whole bankroll the crew may ever touch
 TICKET_PCT = 0.10             # 10% of current equity per copy, never more
+MAX_COIN_PCT = 0.10           # one coin never holds more than 10% of equity
 MAX_OPEN = 3                  # open copies at the same time
 DAILY_LOSS_HALT_USD = 25      # down $25 today: no new copies until tomorrow
+DAY_STOP_PCT = 15             # down 15% since the day began: crew stops itself
+
+# safety (added after the night of Oct 31: a rugcheck timeout let 4 rugs through)
+FILTER_FAILS_PAUSE = 2        # rugcheck errors 2x in a row: no buys until it's back
+STOP_FILE = "STOP"            # file exists = crew does nothing. delete it to restart
+HEALTH = "health.json"        # filter fail streak + start-of-day equity
+NTFY_TOPIC = ""               # ntfy.sh topic for phone pings. empty = print only
 
 # scout
 WALLETS = "wallets.txt"       # one smart wallet per line. you pick them, not the bot
