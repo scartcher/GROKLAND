@@ -6,3 +6,4 @@ done.txt
 __pycache__/
 health.json
 STOP
+polybots/ledger.json

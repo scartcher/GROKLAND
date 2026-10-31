@@ -35,6 +35,10 @@ A 5-agent Grok Bot crew that copies smart wallets on Solana. Paper mode first.
 6. Click **I'm done**, then tell the bot:
    `Every 2 minutes, in /workspace/grokland run python crew.py. Only post lines that start with "Sniper copied" or "Guard".`
 
+## polybots (new)
+
+`polybots/` = 7 Polymarket Up/Down bots rebuilt from 7 real wallets that made $3.3M+. Paper only. See polybots/README.md.
+
 ## safety (added Oct 31)
 
 One night rugcheck started failing at 1:12 AM and the crew kept copying. Four rugs went through.
